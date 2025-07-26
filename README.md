@@ -1,6 +1,8 @@
 # ABAP - Dynamic selection screen
 A fully dynamic selection screen with FREE_SELECTION function modules in SAP ABAP 7.50
-![dyn_sel_preview](https://github.com/user-attachments/assets/31196406-c792-4967-98d2-d44e4e7bb036)
+
+![image](https://github.com/user-attachments/assets/81fd338d-07ae-405f-a659-2f174de0896e)
+
 
 > [!WARNING]
 > Work in progress.
