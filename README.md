@@ -1,5 +1,6 @@
 # ABAP - Dynamic selection screen
 A fully dynamic selection screen with FREE_SELECTION function modules in SAP ABAP 7.50
+![dyn_sel_preview](https://github.com/user-attachments/assets/31196406-c792-4967-98d2-d44e4e7bb036)
 
 > [!WARNING]
 > Work in progress.
@@ -13,7 +14,7 @@ However, if you use the FREE_SEL* function modules, you must accept certain limi
 In this example, we will use the FREE_SEL* function modules to select EKKO (purchase order header data) and add an additional field for the maximum number of rows selected — our own touch, in this case.
 
 First, create a basic selection screen with some dummy ```TABBED BLOCK``` to allow us to use if for our sub-screens. 
-```
+```abap
 " Create dummy tabbed section to get the sub screens. 
 SELECTION-SCREEN BEGIN OF TABBED BLOCK sub_dny_sel FOR 10 LINES.
 SELECTION-SCREEN END OF BLOCK sub_dny_sel.
@@ -30,9 +31,9 @@ SELECTION-SCREEN BEGIN OF SCREEN 200 AS SUBSCREEN.
 SELECTION-SCREEN END OF SCREEN 200.
 ```
 
-In the initialization event of the report 
+During the report's initialization event, we set up the initial selection fields and configured the FREE_SEL* function modules with INIT and DIALOG.
 
-```
+```abap
 INITIALIZATION.
   title = 'Own additional selection'.
 
@@ -72,4 +73,51 @@ INITIALIZATION.
   IF sy-subrc <> 0.
     RETURN.
   ENDIF.
+
+  " Trigger the dialog with the AS_SUBSCREEN = true.
+  CALL FUNCTION 'FREE_SELECTIONS_DIALOG'
+    EXPORTING  selection_id    = selection_id
+               pfkey           = pf_status
+               tree_visible    = abap_false
+               no_frame        = abap_false
+               as_subscreen    = abap_true
+    IMPORTING  where_clauses   = condition
+    TABLES     fields_tab      = selection_fields
+    EXCEPTIONS internal_error  = 1
+               no_action       = 2
+               selid_not_found = 3
+               illegal_status  = 4
+               OTHERS          = 5.
+```
+During the START-OF-SELECTION event, we receive the condition and build a fully dynamic select. Finally, we show the data to the user.
+
+```abap
+START-OF-SELECTION.
+" For this example, we only need the where clauses. So we get it by
+" performing an external on GEN_WHERE_CLAUSES in report SAPLSSEL.
+" Before we need to get the information about current selection id.
+  ASSIGN ('(SAPLSSEL)CURRENT_INFO') TO FIELD-SYMBOL(<sel_info>).
+  PERFORM gen_where_clauses(saplssel) USING    <sel_info>
+                                      CHANGING condition
+                                               sy-subrc.
+
+  " Create fully dynamic select according to free selection condition.
+  TRY.
+      DATA(table_name) = selection_table[ 1 ]-prim_tab.
+    CATCH cx_root.
+      RETURN.
+  ENDTRY.
+
+  DATA data_ref TYPE REF TO data.
+  FIELD-SYMBOLS <selected_data> TYPE INDEX TABLE.
+
+  CREATE DATA data_ref TYPE STANDARD TABLE OF (table_name).
+  ASSIGN data_ref->* TO <selected_data>.
+
+  DATA(where_clause) = condition[ tablename = table_name ].
+
+  SELECT * FROM (table_name) INTO TABLE <selected_data> UP TO pa_max ROWS WHERE (where_clause-where_tab).
+
+  " Output the selected data to user
+  cl_demo_output=>display( <selected_data> ).
 ```
