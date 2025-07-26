@@ -57,9 +57,7 @@ INITIALIZATION.
     RETURN.
   ENDIF.
 
-AT SELECTION-SCREEN OUTPUT.
-
-" At BPO of the selection screen. Trigger the dialog with the AS_SUBSCREEN = true. 
+  " Trigger the dialog with the AS_SUBSCREEN = true.
   CALL FUNCTION 'FREE_SELECTIONS_DIALOG'
     EXPORTING  selection_id    = selection_id
                pfkey           = pf_status
@@ -75,6 +73,14 @@ AT SELECTION-SCREEN OUTPUT.
                OTHERS          = 5.
 
 START-OF-SELECTION.
+" For this example, we only need the where clauses. So we get it by
+" performing an external on GEN_WHERE_CLAUSES in report SAPLSSEL. 
+" Before we need to get the information about current selection id. 
+  ASSIGN ('(SAPLSSEL)CURRENT_INFO') TO FIELD-SYMBOL(<sel_info>).
+  PERFORM gen_where_clauses(saplssel) USING    <sel_info>
+                                      CHANGING condition
+                                               sy-subrc.
+
 " Create fully dynamic select according to free selection condition. 
   TRY.
       DATA(table_name) = selection_table[ 1 ]-prim_tab.
