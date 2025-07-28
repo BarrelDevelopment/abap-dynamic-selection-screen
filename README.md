@@ -1,5 +1,5 @@
 # ABAP - Dynamic selection screen
-A fully dynamic selection screen with `FREE_SELECTION` function modules in `SAP ABAP 7.50` and higher
+A fully dynamic selection screen with `FREE_SELECTION` function modules in `SAP ABAP 7.50` and `S/4 ABAP 7.58`
 <p <p align="center">
 <img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/79f043e5-070a-4063-ad8f-d91060ea7293" />
 </p>
