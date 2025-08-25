@@ -104,7 +104,7 @@ During the `START-OF-SELECTION` event, we receive the condition and build a full
 ```abap
 START-OF-SELECTION.
 " For this example, we only need the where clauses. So we get it by
-" performing an external on GEN_WHERE_CLAUSES in report SAPLSSEL.
+" performing an external on perform GEN_WHERE_CLAUSES in report SAPLSSEL.
 " Before we need to get the information about current selection id.
   ASSIGN ('(SAPLSSEL)CURRENT_INFO') TO FIELD-SYMBOL(<sel_info>).
   PERFORM gen_where_clauses(saplssel) USING    <sel_info>
